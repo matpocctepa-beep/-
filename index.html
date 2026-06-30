@@ -42,20 +42,13 @@
             background: radial-gradient(circle at 50% 0%, rgba(0, 255, 255, 0.15) 0%, rgba(138, 43, 226, 0.15) 60%, rgba(255, 20, 147, 0.05) 100%);
         }
 
-        .bg-grid {
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
         #modal-overlay { transition: opacity 0.3s ease; }
         #modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
         .hidden-modal { opacity: 0; pointer-events: none; }
         .hidden-modal #modal-content { transform: scale(0.95); }
     </style>
 </head>
-<body class="bg-[#0d0d11] text-stone-100 font-sans antialiased bg-grid overflow-x-hidden selection:bg-brand-500 selection:text-stone-950">
+<body class="bg-[#0d0d11] text-stone-100 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-stone-950">
 
     <!-- НАВИГАЦИЯ -->
     <header class="border-b border-white/5 bg-[#0d0d11]/80 backdrop-blur-sm sticky top-0 z-40">
@@ -68,16 +61,16 @@
                 <a href="#pricing" class="hover:text-brand-500 transition-colors">Тарифы</a>
                 <a href="#faq" class="hover:text-brand-500 transition-colors">FAQ</a>
             </nav>
-            <!-- ССЫЛКА НА ПРЯМОЕ СКАЧИВАНИЕ -->
             <a href="https://kotikapi.onrender.com/Kot-vps.apk" target="_blank" class="bg-brand-500 hover:bg-brand-600 text-stone-950 font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-lg shadow-brand-500/10 download-btn">
-                Скачать APK
+                Установить
             </a>
         </div>
     </header>
 
-    <!-- ГЕРОЙ-БАННЕР -->
+    <!-- ГЕРОЙ-БАННЕР С КРАСНО-ОРАНЖЕВЫМ РАЗМЫТЫМ ФОНОМ -->
     <section class="py-16 md:py-24 max-w-6xl mx-auto px-4 relative overflow-hidden">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <!-- НОВЫЙ ФОН: Красно-оранжевый градиент с размытием -->
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-600/40 via-orange-500/40 to-yellow-500/20 blur-[90px] rounded-full pointer-events-none"></div>
         
         <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
@@ -85,9 +78,8 @@
             <div class="order-2 lg:order-1 text-center lg:text-left">
                 
                 <div class="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4 mb-6">
-                    <!-- ССЫЛКА НА ПРЯМОЕ СКАЧИВАНИЕ -->
                     <a href="https://kotikapi.onrender.com/Kot-vps.apk" target="_blank" class="w-full sm:w-auto bg-brand-500 text-stone-950 font-extrabold px-8 py-4 rounded-xl hover:bg-brand-600 transition-all shadow-lg shadow-brand-500/15 text-center download-btn">
-                        Скачать APK
+                        Установить
                     </a>
                 </div>
 
@@ -106,6 +98,8 @@
 
             <!-- Правая часть: Стеклянная карточка -->
             <div class="order-1 lg:order-2 flex justify-center lg:justify-end relative">
+                <!-- Дополнительное мягкое свечение под карточкой -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-pink-500/20 to-orange-400/20 blur-[50px] rounded-full pointer-events-none"></div>
                 
                 <div class="glass-card w-full max-w-[380px] p-8 rounded-3xl relative z-10 text-center border border-white/10 shadow-2xl overflow-hidden">
                     
@@ -251,7 +245,7 @@
                     <span>Как получить 7 дней бесплатно?</span>
                     <span class="text-brand-500 group-open:rotate-180 transition-transform">▼</span>
                 </summary>
-                <p class="mt-3 text-stone-400 text-sm">Нажми "Скачать APK", установи приложение и получи 7 дней бесплатного доступа. Всё просто.</p>
+                <p class="mt-3 text-stone-400 text-sm">Нажми "Установить", установи приложение и получи 7 дней бесплатного доступа. Всё просто.</p>
             </details>
             <details class="group bg-stone-900/50 border border-stone-800 rounded-xl p-4 cursor-pointer hover:border-brand-500/50 transition-all">
                 <summary class="flex justify-between items-center font-bold text-white">
@@ -318,7 +312,6 @@
 
     <!-- СКРИПТ ДЛЯ ПОДСЧЁТА СКАЧИВАНИЙ -->
     <script>
-        // Функция отправки сигнала на сервер для увеличения счётчика
         function trackDownload() {
             fetch('https://kotikapi.onrender.com/upload-apk', { 
                 method: 'POST',
@@ -327,7 +320,6 @@
             }).catch(err => console.log('Ошибка счётчика:', err));
         }
 
-        // Навешиваем обработчик клика на все кнопки с классом download-btn
         document.querySelectorAll('.download-btn').forEach(link => {
             link.addEventListener('click', function() {
                 trackDownload();
