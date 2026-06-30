@@ -22,20 +22,51 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 1. Маршрут для загрузки нового АРК (из админки)
+// 1. Маршрут для загрузки нового АРК (из админки) + СОХРАНЕНИЕ ИСТОРИИ
 app.post('/upload-apk', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).send('Файл не загружен');
   
-  // Обновляем статистику в файле (сбрасываем счетчик скачиваний)
+  // Читаем текущий файл статистики
   const data = JSON.parse(fs.readFileSync('stats.json', 'utf8'));
+  
+  // Сбрасываем счетчик скачиваний для нового файла
   data.downloads = 0;
+  
+  // Готовим данные для истории
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU') + ', ' + now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+  const sizeMB = (req.file.size / (1024 * 1024)).toFixed(2);
+  
+  // Если массив истории ещё не создан, создаём его
+  if (!data.history) data.history = [];
+  
+  // Добавляем новую запись в начало списка
+  data.history.unshift({
+    name: req.file.originalname,
+    size: sizeMB + ' МБ',
+    date: dateStr,
+    isCurrent: true
+  });
+  
+  // Убираем статус "Текущий" у всех старых записей (кроме только что добавленной)
+  data.history.forEach((item, index) => {
+    if (index > 0) item.isCurrent = false;
+  });
+
+  // Сохраняем всё обратно в файл
   fs.writeFileSync('stats.json', JSON.stringify(data, null, 2));
   
-  res.send('АРК успешно заменен!');
+  res.send('АРК успешно заменен! История обновлена.');
 });
 
-// 2. Маршрут для получения статистики (для админки)
+// 2. Маршрут для получения статистики и истории (для админки)
 app.get('/get-stats', (req, res) => {
+  // Если файла нет, создаём дефолтный
+  if (!fs.existsSync('stats.json')) {
+    const initData = { android: 0, ios: 0, windows: 0, mac: 0, downloads: 0, history: [] };
+    fs.writeFileSync('stats.json', JSON.stringify(initData, null, 2));
+  }
+  
   const data = JSON.parse(fs.readFileSync('stats.json', 'utf8'));
   res.json(data);
 });
@@ -48,11 +79,13 @@ app.post('/reset-stats', (req, res) => {
   data.windows = 0;
   data.mac = 0;
   data.downloads = 0;
+  // Сбрасываем также историю, если хотите. Оставляем для чистоты.
+  data.history = []; 
   fs.writeFileSync('stats.json', JSON.stringify(data, null, 2));
-  res.send('Статистика сброшена!');
+  res.send('Статистика сброшена! История очищена.');
 });
 
-// 4. РАЗРЕШАЕМ ОТДАВАТЬ APK ФАЙЛ ПО ПРЯМОЙ ССЫЛКЕ (Исправление ошибки)
+// 4. РАЗРЕШАЕМ ОТДАВАТЬ APK ФАЙЛ ПО ПРЯМОЙ ССЫЛКЕ
 app.get('/Kot-vps.apk', (req, res) => {
     const filePath = path.join(__dirname, 'Kot-vps.apk');
     
@@ -61,7 +94,6 @@ app.get('/Kot-vps.apk', (req, res) => {
         res.download(filePath, 'Kot-vps.apk', (err) => {
             if (err) {
                 console.log('Ошибка при скачивании:', err);
-                // Если ошибка, просто игнорируем, так как браузер уже мог начать загрузку
             }
         });
     } else {
@@ -81,7 +113,8 @@ app.listen(PORT, () => {
         ios: 0, 
         windows: 0, 
         mac: 0, 
-        downloads: 0 
+        downloads: 0,
+        history: [] 
     };
     fs.writeFileSync('stats.json', JSON.stringify(initData, null, 2));
   }
